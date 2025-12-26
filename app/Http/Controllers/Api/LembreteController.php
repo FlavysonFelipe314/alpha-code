@@ -41,7 +41,7 @@ class LembreteController extends Controller
     public function store(StoreLembreteRequest $request)
     {
         $validatedData = $request->validated();
-        $validatedData['user_id'] = 1;
+            $validatedData['user_id'] = auth()->id();
         
         try{
             $lembrete = Lembrete::create($validatedData);

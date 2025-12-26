@@ -13,6 +13,16 @@ return new class extends Migration
     {
         Schema::create('rotinas', function (Blueprint $table) {
             $table->id();
+            $table->string('nome');
+            $table->text('descricao')->nullable();
+            $table->enum('tipo', ['diaria', 'semanal', 'mensal'])->default('diaria');
+            $table->json('dias_semana')->nullable(); // Para rotinas semanais: ['segunda', 'quarta', 'sexta']
+            $table->time('horario')->nullable();
+            $table->boolean('ativo')->default(true);
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->onUpdate('CASCADE')
+                ->onDelete('CASCADE');
             $table->timestamps();
         });
     }

@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'asaas' => [
+        'api_key' => env('ASAAS_API_KEY'),
+        'environment' => env('ASAAS_ENVIRONMENT', 'sandbox'), // sandbox or production
+    ],
+
 ];

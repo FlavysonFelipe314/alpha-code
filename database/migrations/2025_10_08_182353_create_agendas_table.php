@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('agendas', function (Blueprint $table) {
             $table->id();
+            $table->string('title');
+            $table->date('date');
+            $table->time('time');
+            $table->integer('duration')->nullable();
+            $table->string('category')->nullable();
+            $table->text('notes')->nullable();
+            $table->boolean('completed')->default(false);
             $table->timestamps();
         });
     }

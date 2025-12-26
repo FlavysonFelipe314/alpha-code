@@ -1,39 +1,14 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AlphaCode - Plano Alimentar</title>
-    <!-- Incluindo o Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Incluindo a biblioteca de ícones Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0A0A0A;
-            color: #E0E0E0;
-        }
-        .immersive-background {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 50% 50%, rgba(176, 26, 26, 0.1) 0%, rgba(10,10,10,0) 60%);
-            animation: pulse-background 12s infinite ease-in-out;
-            z-index: -1;
-        }
-        @keyframes pulse-background {
-            0%, 100% { transform: scale(1); opacity: 0.7; }
-            50% { transform: scale(1.15); opacity: 1; }
-        }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #18181b; }
-        ::-webkit-scrollbar-thumb { background: #ef4444; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #dc2626; }
+@extends('layouts.app')
+
+@section('title', 'Plano Alimentar')
+
+@push('styles')
+<style>
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; align-items: center; justify-content: center;
             background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px);
-            z-index: 100; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s;
+            z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s;
         }
         .modal.active { opacity: 1; visibility: visible; }
         .modal-content {
@@ -99,11 +74,10 @@
             background-color: rgba(239, 68, 68, 0.1);
         }
     </style>
-</head>
-<body class="min-h-screen">
-    <div class="immersive-background"></div>
+@endpush
 
-    <main class="container mx-auto p-4 md:p-6 lg:p-8">
+@section('content')
+<div class="container mx-auto p-4 md:p-6 lg:p-8">
         <header class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 pb-6">
             <div class="flex items-center space-x-4">
                 {{-- <img src="{{ @asset('Assets/logo.png') }}" alt="Logo" class="h-10 w-auto" style="    object-fit: cover;width: 100px;"> --}}
@@ -124,7 +98,6 @@
         <nav id="week-days-nav" class="flex justify-center space-x-1 md:space-x-2 my-8 p-1 bg-neutral-900/50 rounded-full border border-neutral-800"></nav>
         <div id="planner-container"></div>
         <div id="loader" class="col-span-full text-center text-neutral-500 mt-20"></div>
-    </main>
 
     <!-- Modal para Adicionar/Editar Dieta -->
     <div id="dieta-modal" class="modal">
@@ -235,11 +208,13 @@
             <p class="text-sm text-neutral-400">Isto pode demorar alguns momentos.</p>
         </div>
     </div>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
+@endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
             
-            const API_BASE_URL = 'http://localhost:8000/api';
+            const API_BASE_URL = `${window.location.origin}/api`;
             
             const loader = document.getElementById('loader');
             const addDietaBtn = document.getElementById('add-dieta-btn');
@@ -289,8 +264,16 @@
 
             async function fetchAPI(endpoint, options = {}) {
                 try {
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
                     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', ...options.headers },
+                        headers: { 
+                            'Content-Type': 'application/json', 
+                            'Accept': 'application/json', 
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': csrfToken || '',
+                            ...options.headers 
+                        },
+                        credentials: 'include',
                         mode: 'cors', ...options
                     });
                     if (!response.ok) {
@@ -567,7 +550,6 @@
             initializeUI();
             loadDietas();
         });
-    </script>
-</body>
-</html>
+</script>
+@endpush
 

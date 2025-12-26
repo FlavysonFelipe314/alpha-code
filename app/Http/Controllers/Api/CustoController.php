@@ -40,7 +40,7 @@ class CustoController extends Controller
     {
         try{
             $validatedData = $request->validated();
-            $validatedData['user_id'] = 1;
+            $validatedData['user_id'] = auth()->id();
 
             $custo = Custo::create($validatedData);
             

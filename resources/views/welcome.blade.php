@@ -1,52 +1,104 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AlphaCode - Anotações</title>
-    <!-- Incluindo o Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Incluindo a biblioteca de ícones Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-    
-    
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
-        body {
+@extends('layouts.app')
+
+@section('title', 'Bloco de Notas')
+
+@push('styles')
+<style>
+        /* Estilos do Quill Editor - Tema Escuro */
+        #note-content .ql-container {
             font-family: 'Inter', sans-serif;
-            background-color: #0A0A0A;
-            color: #E0E0E0;
-            overflow: hidden;
+            font-size: 16px;
+            color: #e5e7eb;
+            background: transparent;
+            border: none;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
-        .immersive-background {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 50% 50%, rgba(176, 26, 26, 0.15) 0%, rgba(10,10,10,0) 60%);
-            animation: pulse-background 10s infinite ease-in-out;
-            z-index: -1;
+        #note-content .ql-container.ql-snow {
+            border: none;
         }
-        @keyframes pulse-background {
-            0%, 100% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.2); opacity: 1; }
+        #note-content .ql-editor {
+            flex: 1;
+            color: #e5e7eb;
+            padding: 1rem;
+            overflow-y: auto;
         }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #18181b; }
-        ::-webkit-scrollbar-thumb { background: #ef4444; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #dc2626; }
-        #note-content:focus { outline: none; }
-        #editor-toolbar button {
-            color: #a1a1aa; width: 2.5rem; height: 2.5rem;
-            border-radius: 0.375rem; transition: background-color 0.2s, color 0.2s;
+        #note-content .ql-editor.ql-blank::before {
+            color: #6b7280;
+            font-style: normal;
         }
-        #editor-toolbar button:hover { background-color: #3f3f46; color: #fff; }
-        #editor-toolbar button.active { background-color: #ef4444; color: #fff; }
+        #note-content .ql-editor p,
+        #note-content .ql-editor ol,
+        #note-content .ql-editor ul,
+        #note-content .ql-editor pre,
+        #note-content .ql-editor blockquote,
+        #note-content .ql-editor h1,
+        #note-content .ql-editor h2,
+        #note-content .ql-editor h3 {
+            color: #e5e7eb;
+        }
+        #note-content .ql-toolbar.ql-snow {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #3f3f46;
+            padding: 0.5rem;
+        }
+        #note-content .ql-toolbar.ql-snow .ql-stroke {
+            stroke: #a1a1aa;
+        }
+        #note-content .ql-toolbar.ql-snow .ql-fill {
+            fill: #a1a1aa;
+        }
+        #note-content .ql-toolbar.ql-snow button:hover .ql-stroke,
+        #note-content .ql-toolbar.ql-snow button.ql-active .ql-stroke {
+            stroke: #ef4444;
+        }
+        #note-content .ql-toolbar.ql-snow button:hover .ql-fill,
+        #note-content .ql-toolbar.ql-snow button.ql-active .ql-fill {
+            fill: #ef4444;
+        }
+        #note-content .ql-toolbar.ql-snow .ql-picker-label {
+            color: #a1a1aa;
+        }
+        #note-content .ql-toolbar.ql-snow .ql-picker-label:hover {
+            color: #ef4444;
+        }
+        #note-content .ql-toolbar.ql-snow .ql-picker-options {
+            background: #27272a;
+            border: 1px solid #3f3f46;
+            color: #e5e7eb;
+        }
+        #note-content .ql-toolbar.ql-snow .ql-picker-item {
+            color: #e5e7eb;
+        }
+        #note-content .ql-toolbar.ql-snow .ql-picker-item:hover {
+            background: #3f3f46;
+        }
+        /* Syntax highlighting para blocos de código */
+        #note-content .ql-syntax {
+            background: #1e1e1e !important;
+            color: #d4d4d4 !important;
+            border: 1px solid #3f3f46;
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        /* Links no editor */
+        #note-content .ql-editor a {
+            color: #60a5fa;
+        }
+        #note-content .ql-editor a:hover {
+            color: #93c5fd;
+        }
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; align-items: center; justify-content: center;
             background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px);
-            z-index: 100; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s;
+            z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s;
         }
         .modal.active { opacity: 1; visibility: visible; }
         .modal-content {
@@ -61,19 +113,17 @@
         }
         .close-button:hover { color: white; }
     </style>
-</head>
-<body class="min-h-screen">
-    <div class="immersive-background"></div>
+@endpush
 
-    <main class="h-screen w-screen flex flex-col p-4 md:p-6 lg:p-8">
-        <header class="flex items-center space-x-4 pb-4 border-b border-neutral-800 flex-shrink-0">
-            <img src="logo.png" alt="Logo" class="h-10 w-auto" style="object-fit: cover; width:100px;">
+@section('content')
+<div class="h-screen flex flex-col p-0">
+        <header class="flex items-center space-x-4 p-4 border-b border-neutral-800 flex-shrink-0">
             <h1 class="text-2xl font-black text-white uppercase tracking-wider">Bloco de notas</h1>
         </header>
 
-        <div class="flex-grow flex gap-6 mt-6 overflow-hidden">
+        <div class="flex-grow flex gap-0 overflow-hidden">
             <!-- Coluna Esquerda: Tópicos e Anotações -->
-            <div id="sidebar" class="w-1/3 flex flex-col bg-black/30 rounded-lg p-4">
+            <div id="sidebar" class="w-64 flex flex-col bg-black/30 border-r border-neutral-800 p-4 overflow-y-auto">
                 <div class="flex justify-between items-center mb-4 flex-shrink-0">
                     <h2 class="font-bold text-white uppercase tracking-wider">Tópicos</h2>
                     <button id="add-topic-btn" title="Adicionar Novo Tópico" class="text-neutral-400 hover:text-white transition h-8 w-8 rounded-lg hover:bg-neutral-700">
@@ -89,18 +139,18 @@
             </div>
 
             <!-- Coluna Direita: Editor -->
-            <div id="editor-container" class="w-2/3 flex flex-col bg-neutral-900/50 rounded-lg">
-                <div id="note-editor" class="flex-grow flex flex-col p-6 hidden">
-                    <input type="text" id="note-title" placeholder="Título da Anotação..." class="bg-transparent text-2xl font-bold text-white mb-4 focus:outline-none flex-shrink-0">
-                    <div id="editor-toolbar" class="flex items-center space-x-1 mb-2 border-y border-neutral-700 py-2 flex-shrink-0">
-                        <button data-command="bold" title="Negrito"><i class="fas fa-bold"></i></button>
-                        <button data-command="italic" title="Itálico"><i class="fas fa-italic"></i></button>
-                        <button data-command="underline" title="Sublinhado"><i class="fas fa-underline"></i></button>
-                        <button data-command="insertUnorderedList" title="Lista não ordenada"><i class="fas fa-list-ul"></i></button>
-                        <button data-command="insertOrderedList" title="Lista ordenada"><i class="fas fa-list-ol"></i></button>
-                        <button data-command="formatBlock" data-value="h2" title="Cabeçalho"><i class="fas fa-heading"></i></button>
+            <div id="editor-container" class="flex-1 flex flex-col bg-neutral-900/50 overflow-hidden">
+                <div id="note-editor" class="flex-grow flex flex-col p-6 hidden overflow-hidden">
+                    <div class="flex items-center justify-between mb-4 flex-shrink-0">
+                        <input type="text" id="note-title" placeholder="Título da Anotação..." class="bg-transparent text-2xl font-bold text-white focus:outline-none flex-1">
+                        <label for="note-file-input" class="ml-4 cursor-pointer bg-neutral-700 hover:bg-neutral-600 text-white font-semibold py-2 px-4 rounded-lg text-sm transition border border-neutral-600">
+                            <i class="fas fa-paperclip mr-2"></i>Anexar Arquivo
+                        </label>
+                        <input type="file" id="note-file-input" class="hidden" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif">
                     </div>
-                    <div id="note-content" contenteditable="true" class="flex-grow text-neutral-300 overflow-y-auto py-4"></div>
+                    <div id="file-info" class="mb-2 text-sm text-neutral-400 flex items-center space-x-2 hidden"></div>
+                    <div id="editor-toolbar" class="mb-2 border-y border-neutral-700 py-2 flex-shrink-0"></div>
+                    <div id="note-content" class="flex-grow text-neutral-300 overflow-y-auto"></div>
                     <div class="flex space-x-2 mt-4 flex-shrink-0">
                         <button id="delete-note-btn" class="bg-transparent hover:bg-red-900/50 text-red-500 font-bold py-2 px-4 rounded-lg text-sm transition border border-red-800">Eliminar</button>
                         <button id="save-note-btn" class="flex-grow bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg text-sm transition">Guardar Anotação</button>
@@ -113,7 +163,7 @@
                 </div>
             </div>
         </div>
-    </main>
+</div>
 
     <!-- Modal para Tópicos -->
     <div id="topic-modal" class="modal">
@@ -130,11 +180,21 @@
             </form>
         </div>
     </div>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
+@endsection
+
+@push('scripts')
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prismjs/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prismjs/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prismjs/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prismjs/1.29.0/components/prism-php.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prismjs/1.29.0/components/prism-css.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prismjs/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
             
-            const API_BASE_URL = 'http://localhost:8000/api';
+            const API_BASE_URL = `${window.location.origin}/api`;
             let studyData = {};
             let activeTopicId = null;
             let activeNoteId = null;
@@ -147,8 +207,42 @@
             const noteContentArea = document.getElementById('note-content');
             const saveNoteBtn = document.getElementById('save-note-btn');
             const deleteNoteBtn = document.getElementById('delete-note-btn');
-            const editorToolbar = document.getElementById('editor-toolbar');
             const loaderEl = document.getElementById('study-guide-loader');
+            
+            // Inicializar Quill Editor
+            let quillEditor = null;
+            function initQuillEditor() {
+                if (quillEditor) {
+                    quillEditor.root.innerHTML = '';
+                    return;
+                }
+                
+                quillEditor = new Quill('#note-content', {
+                    theme: 'snow',
+                    modules: {
+                        toolbar: [
+                            [{ 'header': [1, 2, 3, false] }],
+                            ['bold', 'italic', 'underline', 'strike'],
+                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            [{ 'color': [] }, { 'background': [] }],
+                            [{ 'align': [] }],
+                            ['link', 'image', 'code-block'],
+                            ['blockquote'],
+                            ['clean']
+                        ]
+                    },
+                    placeholder: 'Comece a escrever sua anotação...'
+                });
+                
+                // Estilo customizado para o editor
+                const toolbar = noteContentArea.parentElement.querySelector('.ql-toolbar');
+                if (toolbar) {
+                    toolbar.style.background = 'transparent';
+                    toolbar.style.border = 'none';
+                    toolbar.style.borderBottom = '1px solid #3f3f46';
+                    toolbar.style.padding = '0.5rem';
+                }
+            }
             const topicModal = document.getElementById('topic-modal');
             const topicForm = document.getElementById('topic-form');
             const topicModalTitle = document.getElementById('topic-modal-title');
@@ -157,8 +251,16 @@
 
             async function fetchAPI(endpoint, options = {}) {
                 try {
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
                     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', ...options.headers },
+                        headers: { 
+                            'Content-Type': 'application/json', 
+                            'Accept': 'application/json', 
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': csrfToken || '',
+                            ...options.headers 
+                        },
+                        credentials: 'include',
                         mode: 'cors', ...options
                     });
                     if (!response.ok) throw new Error(`Erro na API: ${response.statusText}`);
@@ -183,7 +285,12 @@
                 if (notesResponse?.data) {
                     notesResponse.data.forEach(note => {
                         if (note.topico_anotacao_id && studyData[note.topico_anotacao_id]) {
-                            studyData[note.topico_anotacao_id].notes[note.id] = { title: note.name, content: note.content };
+                            studyData[note.topico_anotacao_id].notes[note.id] = { 
+                            title: note.name, 
+                            content: note.content,
+                            file_path: note.file_path,
+                            file_type: note.file_type
+                        };
                         }
                     });
                 }
@@ -223,15 +330,46 @@
                 });
             }
 
-            function showEditor(show) {
-                noteEditorEl?.classList.toggle('hidden', !show);
-                placeholderViewEl?.classList.toggle('hidden', show);
-            }
-
-            function loadNoteIntoEditor(topicId, noteId) {
-                const note = studyData[topicId].notes[noteId];
-                noteTitleInput.value = note.title;
-                noteContentArea.innerHTML = note.content;
+            async function loadNoteIntoEditor(topicId, noteId) {
+                // Busca a nota completa da API para ter informações do arquivo
+                const response = await fetchAPI(`/notes/${noteId}`);
+                const fullNote = response?.anotacao || studyData[topicId]?.notes[noteId];
+                if (!fullNote) return;
+                
+                noteTitleInput.value = fullNote.name || fullNote.title;
+                
+                // Inicializa o editor se ainda não foi inicializado
+                if (!quillEditor) {
+                    initQuillEditor();
+                }
+                
+                // Carrega o conteúdo no Quill
+                if (quillEditor) {
+                    quillEditor.root.innerHTML = fullNote.content || '';
+                } else {
+                    noteContentArea.innerHTML = fullNote.content || '';
+                }
+                
+                // Mostra informações do arquivo se existir
+                const fileInfoEl = document.getElementById('file-info');
+                if (fullNote.file_path) {
+                    const fileName = fullNote.file_path.split('/').pop();
+                    fileInfoEl.classList.remove('hidden');
+                    fileInfoEl.innerHTML = `
+                        <i class="fas fa-file mr-2"></i>
+                        <span>Arquivo anexado: ${fileName}</span>
+                        <a href="/storage/${fullNote.file_path}" target="_blank" class="ml-2 text-blue-400 hover:text-blue-300">
+                            <i class="fas fa-download"></i> Baixar
+                        </a>
+                    `;
+                } else {
+                    fileInfoEl.classList.add('hidden');
+                }
+                
+                // Limpa seleção de novo arquivo
+                currentFile = null;
+                if (noteFileInput) noteFileInput.value = '';
+                
                 showEditor(true);
             }
 
@@ -326,26 +464,103 @@
                 topicModal.classList.remove('active');
             });
 
+            // Gerenciar upload de arquivo
+            const noteFileInput = document.getElementById('note-file-input');
+            const fileInfo = document.getElementById('file-info');
+            let currentFile = null;
+
+            noteFileInput?.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    currentFile = file;
+                    fileInfo.classList.remove('hidden');
+                    fileInfo.innerHTML = `
+                        <i class="fas fa-file mr-2"></i>
+                        <span>${file.name}</span>
+                        <button type="button" id="remove-file-btn" class="ml-2 text-red-400 hover:text-red-300">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    
+                    document.getElementById('remove-file-btn')?.addEventListener('click', () => {
+                        noteFileInput.value = '';
+                        currentFile = null;
+                        fileInfo.classList.add('hidden');
+                    });
+                }
+            });
+
             saveNoteBtn?.addEventListener('click', async () => {
                 if (!activeTopicId) return;
 
                 const isCreating = activeNoteId === 'new';
-                const endpoint = isCreating ? '/notes' : `/notes/${activeNoteId}`;
+                const endpoint = isCreating ? '/api/notes' : `/api/notes/${activeNoteId}`;
                 const method = isCreating ? 'POST' : 'PUT';
-                const data = {
-                    name: noteTitleInput.value || "Sem Título",
-                    content: noteContentArea.innerHTML,
-                    topico_anotacao_id: activeTopicId
-                };
+                
+                // Pega o conteúdo do Quill se disponível, senão usa o conteúdo HTML normal
+                let content = '';
+                if (quillEditor) {
+                    content = quillEditor.root.innerHTML;
+                } else {
+                    content = noteContentArea.innerHTML;
+                }
+                
+                // Cria FormData para suportar upload de arquivo
+                const formData = new FormData();
+                formData.append('name', noteTitleInput.value || "Sem Título");
+                formData.append('content', content);
+                formData.append('topico_anotacao_id', activeTopicId);
+                
+                if (currentFile) {
+                    formData.append('file', currentFile);
+                }
 
-                const response = await fetchAPI(endpoint, { method, body: JSON.stringify(data) });
-
-                if (response?.anotacao) {
-                    const note = response.anotacao;
-                    studyData[activeTopicId].notes[note.id] = { title: note.name, content: note.content };
-                    activeNoteId = note.id;
-                    renderTopics();
-                    alert(`Anotação ${isCreating ? 'criada' : 'guardada'} com sucesso!`);
+                try {
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                    const response = await fetch(endpoint, {
+                        method: method,
+                        credentials: 'include',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': csrfToken || ''
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({ message: 'Erro ao salvar anotação' }));
+                        alert('Erro ao salvar: ' + (errorData.message || errorData.error || 'Erro desconhecido'));
+                        console.error('Erro na resposta:', errorData);
+                        return;
+                    }
+                    
+                    const result = await response.json();
+                    
+                    if (result?.anotacao || result?.status) {
+                        const note = result.anotacao || result.data || result.note;
+                        if (note) {
+                            studyData[activeTopicId].notes[note.id] = { 
+                                title: note.name, 
+                                content: note.content,
+                                file_path: note.file_path,
+                                file_type: note.file_type
+                            };
+                            activeNoteId = note.id;
+                            renderTopics();
+                            
+                            // Limpa o arquivo selecionado
+                            currentFile = null;
+                            if (noteFileInput) noteFileInput.value = '';
+                            if (fileInfo) fileInfo.classList.add('hidden');
+                            
+                            alert(`Anotação ${isCreating ? 'criada' : 'guardada'} com sucesso!`);
+                        }
+                    } else {
+                        alert('Erro ao salvar: ' + (result.message || 'Erro desconhecido'));
+                    }
+                } catch (error) {
+                    console.error('Erro:', error);
+                    alert('Erro ao salvar anotação');
                 }
             });
             
@@ -362,16 +577,22 @@
                 }
             });
 
-            editorToolbar?.addEventListener('click', (e) => {
-                const button = e.target.closest('button');
-                if (!button) return;
-                document.execCommand(button.dataset.command, false, button.dataset.value);
-                noteContentArea?.focus();
-            });
+            // Inicializa o editor quando necessário
+            function showEditor(show) {
+                if (show) {
+                    noteEditorEl?.classList.remove('hidden');
+                    placeholderViewEl?.classList.add('hidden');
+                    if (!quillEditor && noteContentArea) {
+                        initQuillEditor();
+                    }
+                } else {
+                    noteEditorEl?.classList.add('hidden');
+                    placeholderViewEl?.classList.remove('hidden');
+                }
+            }
 
             loadInitialData();
         });
-    </script>
-</body>
-</html>
+</script>
+@endpush
 

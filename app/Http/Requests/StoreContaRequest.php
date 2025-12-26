@@ -22,11 +22,11 @@ class StoreContaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'banco' => ['required'],
-            'saldo' => ['required'],
-            'pessoa' => ['required'],
-            'tipo_conta' => ['required'],
-            'observacao' => ['nullable'],
+            'banco' => ['required', 'string', 'max:255'],
+            'saldo' => ['required', 'numeric'],
+            'pessoa' => ['required', 'string', 'max:255'],
+            'tipo_conta' => ['required', 'string', 'max:255'],
+            'observacao' => ['nullable', 'string'],
         ];
     }
 }

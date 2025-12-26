@@ -48,7 +48,7 @@ class DietaController extends Controller
     {
 
         $validatedDietaRequest = $dietaRequest->validated();
-        $validatedDietaRequest['user_id'] = 1;
+        $validatedDietaRequest['user_id'] = auth()->id();
 
         $alimentos = $validatedDietaRequest['alimentos'];
         $suplementos = $validatedDietaRequest['suplementos'];
@@ -131,7 +131,7 @@ class DietaController extends Controller
     {
         try{
             $validatedDietaRequest = $dietaRequest->validated();
-            $validatedDietaRequest['user_id'] = 1;
+            $validatedDietaRequest['user_id'] = auth()->id();
             $alimentosNew = $validatedDietaRequest['alimentos'];
             $suplementosNew = $validatedDietaRequest['suplementos'] ?? [];
 

@@ -8,6 +8,8 @@ use App\Http\Requests\UpdateContaRequest;
 use App\Models\Conta;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class ContaController extends Controller
 {
@@ -40,7 +42,12 @@ class ContaController extends Controller
     {
         try{
             $validatedData = $request->validated();
-            $validatedData['user_id'] = 1;
+            $validatedData['user_id'] = auth()->id();
+            
+            // Garantir que observacao seja null se vazio
+            if (empty($validatedData['observacao']) || $validatedData['observacao'] === '') {
+                $validatedData['observacao'] = null;
+            }
 
             $conta = Conta::create($validatedData);
             
@@ -50,11 +57,26 @@ class ContaController extends Controller
                 'message' => 'Conta cadastrada com sucesso'
             ], 200);
 
+        } catch (ValidationException $err) {
+            Log::error('Erro de validação ao criar conta:', [
+                'errors' => $err->errors(),
+                'data' => $request->all()
+            ]);
+            return response()->json([
+                'status' => false,
+                'message' => 'Erro de validação',
+                'errors' => $err->errors()
+            ], 422);
         } catch (Exception $err){
+            Log::error('Erro ao criar conta:', [
+                'error' => $err->getMessage(),
+                'trace' => $err->getTraceAsString(),
+                'data' => $request->all()
+            ]);
             return response()->json([
                 'status' => false,
                 'message' => 'Não foi possível cadastrar a conta',
-                'error' => $err
+                'error' => $err->getMessage()
             ], 400);
         }
     }
@@ -89,6 +111,11 @@ class ContaController extends Controller
     {
         try{
             $validatedData = $request->validated();
+            
+            // Garantir que observacao seja null se vazio
+            if (empty($validatedData['observacao']) || $validatedData['observacao'] === '') {
+                $validatedData['observacao'] = null;
+            }
 
             $conta = Conta::findOrFail($id);
             $conta->update($validatedData);
@@ -99,11 +126,26 @@ class ContaController extends Controller
                 'message' => 'Conta atualizada com sucesso'
             ], 200);
 
+        } catch (ValidationException $err) {
+            Log::error('Erro de validação ao atualizar conta:', [
+                'errors' => $err->errors(),
+                'data' => $request->all()
+            ]);
+            return response()->json([
+                'status' => false,
+                'message' => 'Erro de validação',
+                'errors' => $err->errors()
+            ], 422);
         } catch (Exception $err){
+            Log::error('Erro ao atualizar conta:', [
+                'error' => $err->getMessage(),
+                'trace' => $err->getTraceAsString(),
+                'data' => $request->all()
+            ]);
             return response()->json([
                 'status' => false,
                 'message' => 'Não foi possível atualizar a conta',
-                'error' => $err
+                'error' => $err->getMessage()
             ], 400);
         }
     }

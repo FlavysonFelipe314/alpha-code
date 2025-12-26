@@ -16,7 +16,7 @@ class TopicoAnotacaoController extends Controller
     public function index()
     {
         try{
-            $topicos = TopicoAnotacao::orderBy('created_at', 'DESC')->get();
+            $topicos = TopicoAnotacao::where('user_id', auth()->id())->orderBy('created_at', 'DESC')->get();
             
             return response()->json([
                 'status' => true,
@@ -38,7 +38,7 @@ class TopicoAnotacaoController extends Controller
     public function store(StoreTopicoAnotacaoResquest $request)
     {
         $validatedData = $request->validated();
-        $validatedData['user_id'] = 1;
+        $validatedData['user_id'] = auth()->id();
         
         try{
             $user = TopicoAnotacao::create($validatedData);
@@ -70,7 +70,29 @@ class TopicoAnotacaoController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        try {
+            $topico = TopicoAnotacao::where('user_id', auth()->id())->findOrFail($id);
+            
+            $validatedData = $request->validate([
+                'name' => 'required|string|max:255'
+            ]);
+            
+            $topico->update($validatedData);
+            
+            return response()->json([
+                'status' => true,
+                'user' => $topico, // Mantém 'user' para compatibilidade com o frontend
+                'topic' => $topico,
+                'data' => $topico,
+                'message' => 'Tópico atualizado com sucesso'
+            ], 200);
+        } catch (Exception $err) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Não foi possível atualizar o tópico',
+                'error' => $err->getMessage()
+            ], 400);
+        }
     }
 
     /**
@@ -78,6 +100,20 @@ class TopicoAnotacaoController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            $topico = TopicoAnotacao::where('user_id', auth()->id())->findOrFail($id);
+            $topico->delete();
+            
+            return response()->json([
+                'status' => true,
+                'message' => 'Tópico deletado com sucesso'
+            ], 200);
+        } catch (Exception $err) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Não foi possível deletar o tópico',
+                'error' => $err->getMessage()
+            ], 400);
+        }
     }
 }

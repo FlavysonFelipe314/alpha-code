@@ -7,6 +7,26 @@ use Illuminate\Database\Eloquent\Model;
 
 class Rotina extends Model
 {
-    /** @use HasFactory<\Database\Factories\RotinaFactory> */
     use HasFactory;
+
+    protected $fillable = [
+        'nome',
+        'descricao',
+        'tipo',
+        'dias_semana',
+        'horario',
+        'ativo',
+        'user_id',
+    ];
+
+    protected $casts = [
+        'dias_semana' => 'array',
+        'horario' => 'datetime',
+        'ativo' => 'boolean',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

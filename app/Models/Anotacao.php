@@ -20,6 +20,8 @@ class Anotacao extends Model
         'content',
         'user_id',
         'topico_anotacao_id',
+        'file_path',
+        'file_type',
     ];
 
     public function user()

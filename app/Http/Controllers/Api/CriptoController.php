@@ -40,7 +40,7 @@ class CriptoController extends Controller
     {
         try{
             $validatedData = $request->validated();
-            $validatedData['user_id'] = 1;
+            $validatedData['user_id'] = auth()->id();
 
             $cripto = Cripto::create($validatedData);
             

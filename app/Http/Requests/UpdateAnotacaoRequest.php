@@ -24,6 +24,7 @@ class UpdateAnotacaoRequest extends FormRequest
         return [
             'name' => ["required","max:255"],
             'content' => ["nullable"],
+            'file' => ['nullable', 'file', 'mimes:pdf,doc,docx,txt,jpg,jpeg,png,gif', 'max:102400'], // 100MB max
         ];
     }
 }

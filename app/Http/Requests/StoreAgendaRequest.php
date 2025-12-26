@@ -11,7 +11,7 @@ class StoreAgendaRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,13 @@ class StoreAgendaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'title' => ['required','string','max:255'],
+            'date' => ['required','date'],
+            'time' => ['required','date_format:H:i'],
+            'duration' => ['nullable','integer','min:1'],
+            'category' => ['nullable','string','max:100'],
+            'notes' => ['nullable','string'],
+            'completed' => ['nullable','boolean'],
         ];
     }
 }

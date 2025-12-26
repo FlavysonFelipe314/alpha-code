@@ -1,26 +1,11 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AlphaCode - Controlo Financeiro</title>
-    <!-- Incluindo o Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
-    <!-- Incluindo a biblioteca de ícones Font Awesome --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <!-- Incluindo a biblioteca Chart.js para gráficos --><script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
+@extends('layouts.app')
+
+@section('title', 'Finanças')
+
+@push('styles')
+<style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0A0A0A;
-            color: #E0E0E0;
-            overflow-x: hidden; /* Prevent horizontal scroll */
-        }
-        .immersive-background {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 50% 50%, rgba(176, 26, 26, 0.1) 0%, rgba(10,10,10,0) 70%);
-            animation: pulse-background 15s infinite ease-in-out;
-            z-index: -1;
-        }
+        /* Estilos específicos da página de finanças */
         @keyframes pulse-background {
             0%, 100% { transform: scale(1); opacity: 0.7; }
             50% { transform: scale(1.1); opacity: 0.9; }
@@ -33,7 +18,7 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; align-items: center; justify-content: center;
             background-color: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px);
-            z-index: 100; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s;
+            z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s;
         }
         .modal.active { opacity: 1; visibility: visible; }
         .modal-content {
@@ -116,32 +101,28 @@
             color: white;
         }
     </style>
-</head>
-<body class="h-screen flex flex-col">
-    <div class="immersive-background"></div>
+@endpush
 
-    <!-- Top Navigation Bar --><header class="w-full bg-gray-900/50 p-4 flex justify-between items-center border-b border-gray-700/50 backdrop-filter backdrop-blur-lg z-20">
-        <div class="flex items-center space-x-3">
-            <img src="{{ @asset('Assets/logo.png') }}" alt="Logo" class="h-10 w-auto" style="    object-fit: cover;width: 100px;">
-             <h1 class="text-xl font-black text-white uppercase tracking-wider hidden md:block">Financeiro</h1>
-        </div>
-        <nav class="flex space-x-2">
-            <a href="#" class="nav-link active" data-view="dashboard"><i class="fas fa-tachometer-alt"></i><span class="hidden md:inline">Dashboard</span></a>
-            <a href="#" class="nav-link" data-view="receitas"><i class="fas fa-chart-pie"></i><span class="hidden md:inline">Receitas</span></a>
-            <a href="#" class="nav-link" data-view="custos"><i class="fas fa-chart-line"></i><span class="hidden md:inline">Custos</span></a>
-            <a href="#" class="nav-link" data-view="carteira"><i class="fas fa-wallet"></i><span class="hidden md:inline">Carteira</span></a>
+@section('content')
+<div class="container mx-auto p-4 md:p-6 lg:p-8">
+    <!-- Internal Navigation Bar -->
+    <header class="mb-6 p-4 bg-neutral-900/50 rounded-lg flex flex-col md:flex-row justify-between items-center border border-neutral-700/50 backdrop-filter backdrop-blur-lg">
+        <h1 class="text-xl font-black text-white uppercase tracking-wider mb-4 md:mb-0">Financeiro</h1>
+        <nav class="flex space-x-2 mb-4 md:mb-0">
+            <a href="#" class="nav-link active" data-view="dashboard"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a>
+            <a href="#" class="nav-link" data-view="receitas"><i class="fas fa-chart-pie"></i><span>Receitas</span></a>
+            <a href="#" class="nav-link" data-view="custos"><i class="fas fa-chart-line"></i><span>Custos</span></a>
+            <a href="#" class="nav-link" data-view="carteira"><i class="fas fa-wallet"></i><span>Carteira</span></a>
         </nav>
         <div class="flex items-center space-x-2">
             <button id="add-receita-btn" class="p-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition flex items-center justify-center text-sm" title="Nova Receita">
-                <i class="fas fa-plus"></i><span class="hidden md:inline ml-2">Receita</span>
+                <i class="fas fa-plus"></i><span class="ml-2">Receita</span>
             </button>
             <button id="add-custo-btn" class="p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition flex items-center justify-center text-sm" title="Novo Custo">
-                <i class="fas fa-minus"></i><span class="hidden md:inline ml-2">Custo</span>
+                <i class="fas fa-minus"></i><span class="ml-2">Custo</span>
             </button>
         </div>
     </header>
-
-    <!-- Main Content Area --><main class="flex-1 overflow-y-auto p-6 md:p-8 lg:p-10 z-10">
         
         <!-- View: Dashboard --><div id="view-dashboard" class="view-content">
             <header class="flex flex-col md:flex-row justify-between items-center mb-8">
@@ -385,16 +366,19 @@
             </div>
         </div>
 
-    </main>
+</div>
 
-    <!-- Modais --><div id="transaction-modal" class="modal"> <div class="modal-content max-h-[90vh] flex flex-col"> <button class="close-button">&times;</button> <h2 id="transaction-modal-title" class="text-2xl font-bold text-white mb-6 flex-shrink-0">Nova Transação</h2> <form id="transaction-form" class="flex-grow overflow-y-auto pr-4 space-y-4"> <input type="hidden" id="transaction-type"> <input type="hidden" id="transaction-id"> <div><label for="transaction-titulo" class="block text-sm font-medium text-neutral-300 mb-1">Título</label><input type="text" id="transaction-titulo" placeholder="Ex: Salário, Supermercado" class="mt-1 w-full form-input" required></div> <div class="grid grid-cols-2 gap-4"> <div><label for="transaction-valor" class="block text-sm font-medium text-neutral-300 mb-1">Valor (R$)</label><input type="number" step="0.01" id="transaction-valor" placeholder="0,00" class="mt-1 w-full form-input" required></div> <div><label for="transaction-data" class="block text-sm font-medium text-neutral-300 mb-1">Data</label><input type="date" id="transaction-data" class="mt-1 w-full form-input" required></div> </div> <div> <label for="transaction-categoria" class="block text-sm font-medium text-neutral-300 mb-1">Categoria</label> <select id="transaction-categoria" class="mt-1 w-full form-select" required> <option value="" disabled selected>Selecione...</option> </select> </div> <div id="custo-fields" class="space-y-4 hidden"> <div class="grid grid-cols-2 gap-4"> <div> <label for="custo-tipo" class="block text-sm font-medium text-neutral-300 mb-1">Tipo</label> <select id="custo-tipo" class="mt-1 w-full form-select"></select> </div> <div> <label for="custo-forma-pagamento" class="block text-sm font-medium text-neutral-300 mb-1">Forma Pagamento</label> <select id="custo-forma-pagamento" class="mt-1 w-full form-select"></select> </div> </div> </div> <div><label for="transaction-observacao" class="block text-sm font-medium text-neutral-300 mb-1">Observação</label><textarea id="transaction-observacao" rows="2" class="mt-1 w-full form-input"></textarea></div> <div class="flex items-center"><input type="checkbox" id="transaction-efetivado" class="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500 bg-neutral-700 border-neutral-600"><label for="transaction-efetivado" class="ml-2 block text-sm text-neutral-300">Marcar como Efetivado</label></div> <div class="pt-6 border-t border-neutral-700 flex-shrink-0"><button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition">Guardar Transação</button></div> </form> </div> </div>
+<!-- Modais --><div id="transaction-modal" class="modal"> <div class="modal-content max-h-[90vh] flex flex-col"> <button class="close-button">&times;</button> <h2 id="transaction-modal-title" class="text-2xl font-bold text-white mb-6 flex-shrink-0">Nova Transação</h2> <form id="transaction-form" class="flex-grow overflow-y-auto pr-4 space-y-4"> <input type="hidden" id="transaction-type"> <input type="hidden" id="transaction-id"> <div><label for="transaction-titulo" class="block text-sm font-medium text-neutral-300 mb-1">Título</label><input type="text" id="transaction-titulo" placeholder="Ex: Salário, Supermercado" class="mt-1 w-full form-input" required></div> <div class="grid grid-cols-2 gap-4"> <div><label for="transaction-valor" class="block text-sm font-medium text-neutral-300 mb-1">Valor (R$)</label><input type="number" step="0.01" id="transaction-valor" placeholder="0,00" class="mt-1 w-full form-input" required></div> <div><label for="transaction-data" class="block text-sm font-medium text-neutral-300 mb-1">Data</label><input type="date" id="transaction-data" class="mt-1 w-full form-input" required></div> </div> <div> <label for="transaction-categoria" class="block text-sm font-medium text-neutral-300 mb-1">Categoria</label> <select id="transaction-categoria" class="mt-1 w-full form-select" required> <option value="" disabled selected>Selecione...</option> </select> </div> <div id="custo-fields" class="space-y-4 hidden"> <div class="grid grid-cols-2 gap-4"> <div> <label for="custo-tipo" class="block text-sm font-medium text-neutral-300 mb-1">Tipo</label> <select id="custo-tipo" class="mt-1 w-full form-select"></select> </div> <div> <label for="custo-forma-pagamento" class="block text-sm font-medium text-neutral-300 mb-1">Forma Pagamento</label> <select id="custo-forma-pagamento" class="mt-1 w-full form-select"></select> </div> </div> </div> <div><label for="transaction-observacao" class="block text-sm font-medium text-neutral-300 mb-1">Observação</label><textarea id="transaction-observacao" rows="2" class="mt-1 w-full form-input"></textarea></div> <div class="flex items-center"><input type="checkbox" id="transaction-efetivado" class="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500 bg-neutral-700 border-neutral-600"><label for="transaction-efetivado" class="ml-2 block text-sm text-neutral-300">Marcar como Efetivado</label></div> <div class="pt-6 border-t border-neutral-700 flex-shrink-0"><button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition">Guardar Transação</button></div> </form> </div> </div>
     <div id="conta-modal" class="modal"> <div class="modal-content max-h-[90vh] flex flex-col"> <button class="close-button">&times;</button> <h2 id="conta-modal-title" class="text-2xl font-bold text-white mb-6 flex-shrink-0">Nova Conta Bancária</h2> <form id="conta-form" class="space-y-4"> <input type="hidden" id="conta-id"> <div><label for="conta-banco" class="block text-sm font-medium text-neutral-300 mb-1">Banco</label><input type="text" id="conta-banco" placeholder="Ex: Banco Principal" class="mt-1 w-full form-input" required></div> <div class="grid grid-cols-2 gap-4"> <div><label for="conta-saldo" class="block text-sm font-medium text-neutral-300 mb-1">Saldo Atual (R$)</label><input type="number" step="0.01" id="conta-saldo" placeholder="0,00" class="mt-1 w-full form-input" required></div> <div><label for="conta-tipo" class="block text-sm font-medium text-neutral-300 mb-1">Tipo de Conta</label><select id="conta-tipo" class="mt-1 w-full form-select"><option>Corrente</option><option>Poupança</option><option>Investimento</option><option>Pagamentos</option></select></div> </div> <div><label for="conta-pessoa" class="block text-sm font-medium text-neutral-300 mb-1">Pessoa</label><select id="conta-pessoa" class="mt-1 w-full form-select"><option>Pessoal</option><option>Empresa</option></select></div> <div><label for="conta-observacao" class="block text-sm font-medium text-neutral-300 mb-1">Observação</label><textarea id="conta-observacao" rows="2" class="mt-1 w-full form-input"></textarea></div> <div class="pt-6 border-t border-neutral-700 flex-shrink-0"><button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition">Guardar Conta</button></div> </form> </div> </div>
-    <div id="cripto-modal" class="modal"> <div class="modal-content max-h-[90vh] flex flex-col"> <button class="close-button">&times;</button> <h2 id="cripto-modal-title" class="text-2xl font-bold text-white mb-6 flex-shrink-0">Novo Criptoativo</h2> <form id="cripto-form" class="space-y-4"> <input type="hidden" id="cripto-id"> <div class="grid grid-cols-2 gap-4"> <div><label for="cripto-moeda" class="block text-sm font-medium text-neutral-300 mb-1">Moeda</label><input type="text" id="cripto-moeda" placeholder="Ex: Bitcoin (BTC)" class="mt-1 w-full form-input" required></div> <div><label for="cripto-saldo" class="block text-sm font-medium text-neutral-300 mb-1">Saldo</label><input type="number" step="any" id="cripto-saldo" placeholder="0.0000" class="mt-1 w-full form-input" required></div> </div> <div><label for="cripto-observacao" class="block text-sm font-medium text-neutral-300 mb-1">Observação</label><textarea id="cripto-observacao" rows="2" class="mt-1 w-full form-input"></textarea></div> <div class="pt-6 border-t border-neutral-700 flex-shrink-0"><button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition">Guardar Criptoativo</button></div> </form> </div> </div>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
+    <div id="cripto-modal" class="modal"> <div class="modal-content max-h-[90vh] flex flex-col"> <button class="close-button">&times;</button> <h2 id="cripto-modal-title" class="text-2xl font-bold text-white mb-6 flex-shrink-0">Novo Criptoativo</h2> <form id="cripto-form" class="space-y-4"> <input type="hidden" id="cripto-id"> <div class="grid grid-cols-2 gap-4"> <div><label for="cripto-moeda" class="block text-sm font-medium text-neutral-300 mb-1">Moeda</label><input type="text" id="cripto-moeda" placeholder="Ex: Bitcoin (BTC)" class="mt-1 w-full form-input" required></div> <div><label for="cripto-saldo" class="block text-sm font-medium text-neutral-300 mb-1">Saldo</label><input type="number" step="any" id="cripto-saldo" placeholder="0.0000" class="mt-1 w-full form-input" required></div> </div> <div><label for="cripto-observacao" class="block text-sm font-medium text-neutral-300 mb-1">Observação</label><textarea id="cripto-observacao" rows="2" class="mt-1 w-full form-input"></textarea></div> <div class="pt-6 border-t border-neutral-700 flex-shrink-0"><button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition">Guardar Criptoativo</button></div> </form> </div>     </div>
+@endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
             
-            const API_BASE_URL = 'http://localhost:8000/api'; 
+            const API_BASE_URL = `${window.location.origin}/api`; 
 
             // Elementos DOM (vários)...
             const addReceitaBtn = document.getElementById('add-receita-btn');
@@ -449,8 +433,16 @@
 
             async function fetchAPI(endpoint, options = {}) {
                 try {
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
                     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', ...options.headers },
+                        headers: { 
+                            'Content-Type': 'application/json', 
+                            'Accept': 'application/json', 
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': csrfToken || '',
+                            ...options.headers 
+                        },
+                        credentials: 'include',
                         mode: 'cors', ...options
                     });
                      if (!response.ok) {
@@ -914,6 +906,5 @@
 
         });
     </script>
-</body>
-</html>
+@endpush
 

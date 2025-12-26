@@ -21,6 +21,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'is_admin',
+        'theme_colors',
+        'plano_id',
     ];
 
     /**
@@ -43,6 +46,58 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_admin' => 'boolean',
+            'theme_colors' => 'array',
         ];
+    }
+
+    public function rituais()
+    {
+        return $this->hasMany(Ritual::class);
+    }
+
+    public function modoCaverna()
+    {
+        return $this->hasOne(ModoCaverna::class);
+    }
+
+    public function desafiosCaverna()
+    {
+        return $this->hasMany(DesafioCaverna::class);
+    }
+
+    public function pomodoros()
+    {
+        return $this->hasMany(Pomodoro::class);
+    }
+
+    public function tarefas()
+    {
+        return $this->hasMany(Tarefa::class);
+    }
+
+    public function tarefaColunas()
+    {
+        return $this->hasMany(TarefaColuna::class);
+    }
+
+    public function treinos()
+    {
+        return $this->hasMany(Treino::class);
+    }
+
+    public function rotinas()
+    {
+        return $this->hasMany(Rotina::class);
+    }
+
+    public function plano()
+    {
+        return $this->belongsTo(Plano::class);
+    }
+
+    public function assinaturas()
+    {
+        return $this->hasMany(Assinatura::class);
     }
 }
