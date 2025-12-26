@@ -153,3 +153,4 @@ Com base nesses dados, **gere automaticamente um plano de treino completo para T
 
 
 
+

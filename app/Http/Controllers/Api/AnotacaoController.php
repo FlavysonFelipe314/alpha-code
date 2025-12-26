@@ -8,6 +8,8 @@ use App\Http\Requests\UpdateAnotacaoRequest;
 use App\Models\Anotacao;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class AnotacaoController extends Controller
 {
@@ -17,7 +19,9 @@ class AnotacaoController extends Controller
     public function index()
     {
         try{
-            $anotacoes = Anotacao::orderBy('created_at', 'DESC')->get();
+            $anotacoes = Anotacao::where('user_id', auth()->id())
+                ->orderBy('created_at', 'DESC')
+                ->get();
             
             return response()->json([
                 'status' => true,
@@ -28,7 +32,7 @@ class AnotacaoController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Não foi possível listar as anotações',
-                'error' => $err
+                'error' => $err->getMessage()
             ], 400);
         }
     }
@@ -38,23 +42,35 @@ class AnotacaoController extends Controller
      */
     public function store(StoreAnotacaoRequest $request)
     {
-        $validatedData = $request->validated();
-        $validatedData['user_id'] = 1;
-        
-        try{
-
-            $anotacao = Anotacao::create($validatedData);
+        try {
+            // Aceita tanto FormData quanto JSON
+            $data = $request->validated();
+            $data['user_id'] = auth()->id();
             
-            if($validatedData['topico_anotacao_id']){
-                 
+            // Upload do arquivo se existir
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $filePath = $file->storeAs('anotacoes', $fileName, 'public');
+                
+                $data['file_path'] = $filePath;
+                $data['file_type'] = $file->getMimeType();
+            }
+            
+            // Se content não foi fornecido, usa string vazia
+            if (!isset($data['content'])) {
+                $data['content'] = '';
             }
 
+            $anotacao = Anotacao::create($data);
+            
             return response()->json([
                 'status' => true,
                 'anotacao' => $anotacao,
                 'message' => 'Anotação cadastrada com sucesso'
             ], 200);
         } catch (Exception $err){
+            Log::error('Erro ao criar anotação:', ['error' => $err->getMessage()]);
             return response()->json([
                 'status' => false,
                 'message' => 'Não foi possível cadastrar a anotação',
@@ -68,8 +84,8 @@ class AnotacaoController extends Controller
      */
     public function show(string $id)
     {
-        try{
-            $anotacao = Anotacao::findOrFail($id);
+        try {
+            $anotacao = Anotacao::where('user_id', auth()->id())->findOrFail($id);
          
             return response()->json([
                 'status' => true,
@@ -80,7 +96,7 @@ class AnotacaoController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Não foi possível encontrar a anotação',
-                'error' => $err
+                'error' => $err->getMessage()
             ], 400);
         }
     }
@@ -90,11 +106,28 @@ class AnotacaoController extends Controller
      */
     public function update(UpdateAnotacaoRequest $request, string $id)
     {
-        try{
-            $anotacao = Anotacao::findOrFail($id);
-            $validatedData = $request->validated(); 
+        try {
+            $anotacao = Anotacao::where('user_id', auth()->id())->findOrFail($id);
             
-            $anotacao->update($validatedData);
+            // Aceita tanto FormData quanto JSON
+            $data = $request->validated();
+            
+            // Upload do arquivo se existir e for novo
+            if ($request->hasFile('file')) {
+                // Deleta arquivo antigo se existir
+                if ($anotacao->file_path && Storage::disk('public')->exists($anotacao->file_path)) {
+                    Storage::disk('public')->delete($anotacao->file_path);
+                }
+                
+                $file = $request->file('file');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $filePath = $file->storeAs('anotacoes', $fileName, 'public');
+                
+                $data['file_path'] = $filePath;
+                $data['file_type'] = $file->getMimeType();
+            }
+            
+            $anotacao->update($data);
          
             return response()->json([
                 'status' => true,
@@ -102,10 +135,11 @@ class AnotacaoController extends Controller
                 'message' => 'Anotação atualizada com sucesso'
             ], 200);
         } catch (Exception $err){
+            Log::error('Erro ao atualizar anotação:', ['error' => $err->getMessage()]);
             return response()->json([
                 'status' => false,
                 'message' => 'Não foi possível atualizar a anotação',
-                'error' => $err
+                'error' => $err->getMessage()
             ], 400);
         }
     }
@@ -115,8 +149,14 @@ class AnotacaoController extends Controller
      */
     public function destroy(string $id)
     {
-        try{
-            $anotacao = Anotacao::findOrFail($id);
+        try {
+            $anotacao = Anotacao::where('user_id', auth()->id())->findOrFail($id);
+            
+            // Deleta arquivo se existir
+            if ($anotacao->file_path && Storage::disk('public')->exists($anotacao->file_path)) {
+                Storage::disk('public')->delete($anotacao->file_path);
+            }
+            
             $anotacao->delete();
             
             return response()->json([
@@ -127,7 +167,7 @@ class AnotacaoController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Não foi possível deletar a anotação',
-                'error' => $err
+                'error' => $err->getMessage()
             ], 400);
         }
     }
